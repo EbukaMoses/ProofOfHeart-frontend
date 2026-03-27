@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import WalletConnection from "./WalletConnection";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -43,12 +44,9 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="hidden h-10 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-500 px-5 text-sm font-semibold text-white transition-all hover:from-red-600 hover:to-pink-600 hover:shadow-lg md:inline-flex"
-          >
-            Connect Wallet
-          </button>
+          <div className="hidden md:block">
+            <WalletConnection onWalletConnected={() => {}} onWalletDisconnected={() => {}} />
+          </div>
 
           <button
             type="button"
@@ -104,12 +102,9 @@ export default function Navbar() {
               </ul>
             </nav>
 
-            <button
-              type="button"
-              className="h-10 w-full rounded-full bg-gradient-to-r from-red-500 to-pink-500 px-4 text-sm font-semibold text-white transition-all hover:from-red-600 hover:to-pink-600"
-            >
-              Connect Wallet
-            </button>
+            <div className="mt-2">
+              <WalletConnection onWalletConnected={() => {}} onWalletDisconnected={() => {}} />
+            </div>
           </div>
         </div>
       )}

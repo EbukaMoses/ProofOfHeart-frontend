@@ -45,7 +45,7 @@ export default function CauseDetailClient({ id }: { id: string }) {
     const existing = stellarVotingService.getUserVote(String(campaign.id), userWalletAddress);
     if (existing) {
       setUserVote({
-        campaignId: String(campaign.id),
+        causeId: String(campaign.id),
         voter: userWalletAddress,
         voteType: existing.voteType,
         timestamp: existing.timestamp,
@@ -68,7 +68,7 @@ export default function CauseDetailClient({ id }: { id: string }) {
     try {
       const transactionHash = await stellarVotingService.castVote(id, voteType, userWalletAddress);
       const newVote: Vote = {
-        campaignId: id,
+        causeId: id,
         voter: userWalletAddress,
         voteType,
         timestamp: new Date(),

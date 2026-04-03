@@ -1,0 +1,22 @@
+fix: resolve merge conflicts across all affected files
+
+# Conflicts:
+#	src/app/[locale]/dashboard/page.tsx
+#	src/app/causes/[id]/CauseDetailClient.tsx
+#	src/components/Navbar.tsx
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# interactive rebase in progress; onto 23ba42b
+# Last commands done (4 commands done):
+#    pick 354dc35 # Implement responsive design and mobile optimization
+#    pick 5438f66 # fix: resolve merge conflicts across all affected files
+# No commands remaining.
+# You are currently rebasing branch 'Implement_responsive' on '23ba42b'.
+#
+# Changes to be committed:
+#	modified:   src/app/[locale]/dashboard/page.tsx
+#	modified:   src/app/causes/[id]/CauseDetailClient.tsx
+#	modified:   src/components/Navbar.tsx
+#

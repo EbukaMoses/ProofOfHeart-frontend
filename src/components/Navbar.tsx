@@ -3,6 +3,16 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useWallet } from "@/components/WalletContext";
+<<<<<<< HEAD
+=======
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/causes", label: "Explore Causes" },
+  { href: "/submit", label: "Submit a Cause" },
+  { href: "/about", label: "About" },
+];
+>>>>>>> 5438f66 (fix: resolve merge conflicts across all affected files)
 import { useTheme } from "@/hooks/useTheme";
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
@@ -180,6 +190,7 @@ export default function Navbar() {
                 >
                   {isLoading ? t('connecting') : t('connectWallet')}
                 </button>
+<<<<<<< HEAD
               ) : (
                 <div className="flex flex-col gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
                   <div className="flex items-center justify-between">
@@ -205,5 +216,13 @@ export default function Navbar() {
           </div>
       }
     </header >
+=======
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+>>>>>>> 5438f66 (fix: resolve merge conflicts across all affected files)
   );
 }

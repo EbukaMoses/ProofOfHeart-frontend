@@ -86,10 +86,17 @@ export default function DashboardPage() {
           <span className="text-zinc-500 dark:text-zinc-400">You haven&apos;t submitted any campaigns yet.</span>
         ) : (
           <ul className="space-y-2">
+<<<<<<< HEAD:src/app/[locale]/dashboard/page.tsx
             {submittedCampaigns.map((campaign) => (
               <li key={campaign.id} className="border rounded-xl p-4 bg-zinc-50 dark:bg-zinc-900 min-h-[60px]">
                 <div className="font-medium text-zinc-900 dark:text-zinc-50">{campaign.title}</div>
                 <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">{campaign.description}</div>
+=======
+            {submittedCauses.map((cause) => (
+              <li key={cause.id} className="border rounded-xl p-4 bg-zinc-50 dark:bg-zinc-900 min-h-[60px]">
+                <div className="font-medium text-zinc-900 dark:text-zinc-50">{cause.title}</div>
+                <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">{cause.description}</div>
+>>>>>>> 5438f66 (fix: resolve merge conflicts across all affected files):src/app/dashboard/page.tsx
               </li>
             ))}
           </ul>

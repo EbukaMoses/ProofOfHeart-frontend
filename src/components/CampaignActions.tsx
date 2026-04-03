@@ -9,7 +9,9 @@ import { usePlatformFee } from '../hooks/usePlatformFee';
 import {
   contribute,
   cancelCampaign,
+  depositRevenue,
   claimRefund,
+  claimRevenue,
   verifyCampaign
 } from '../lib/contractClient';
 import { useToast } from './ToastProvider';
@@ -30,6 +32,8 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
   const { showSuccess, showError, showWarning } = useToast();
   const [isPending, setIsPending] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('');
+  const [revenueAmount, setRevenueAmount] = useState('');
+  const [showRevenueInput, setShowRevenueInput] = useState(false);
 
   const isCreator = publicKey === campaign.creator;
   const isAdmin = !!publicKey && publicKey === admin;
@@ -48,14 +52,22 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
     }
   };
 
+  const handleDepositRevenue = async () => {
+    const xlm = parseFloat(revenueAmount);
+    if (!xlm || xlm <= 0) return;
+    await handleAction(() => depositRevenue(campaign.id, xlmToStroops(xlm)), 'Revenue deposited!');
+    setRevenueAmount('');
+    setShowRevenueInput(false);
+  };
+
   if (!isWalletConnected) {
     return (
-      <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-6 text-center">
-        <p className="text-zinc-600 dark:text-zinc-400 mb-4">Connect your wallet to interact with this campaign.</p>
+      <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5 text-center">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Connect your wallet to interact with this campaign.</p>
         <p className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
           A platform fee of {basisPointsToPercentage(platformFeeBps)} is deducted from funds when withdrawn by the creator.
         </p>
-        <button onClick={connectWallet} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-colors">
+        <button onClick={connectWallet} className="w-full py-3 min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-colors">
           Connect Wallet to Contribute
         </button>
       </div>
@@ -92,8 +104,8 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
   return (
     <div className="space-y-4">
       {!isCreator && (
-        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Support this cause</h3>
+        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
+          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Support this cause</h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
             A platform fee of {basisPointsToPercentage(platformFeeBps)} is deducted from funds when withdrawn by the creator.
           </p>
@@ -133,8 +145,8 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
       {isCreator && (
         <>
           <WithdrawFunds campaign={campaign} userWalletAddress={publicKey} platformFeeBps={platformFeeBps} onWithdrawSuccess={onActionSuccess} />
-          <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Creator Dashboard</h3>
+          <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
+            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Creator Dashboard</h3>
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => handleAction(() => cancelCampaign(campaign.id), 'Campaign cancelled.')}
@@ -143,14 +155,56 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
               >
                 {isPending && <Spinner />} Cancel Campaign
               </button>
+
+              {campaign.has_revenue_sharing && (
+                showRevenueInput ? (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={revenueAmount}
+                        onChange={(e) => setRevenueAmount(e.target.value)}
+                        placeholder="Amount in XLM"
+                        className="w-full px-4 py-3 pr-16 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400">XLM</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleDepositRevenue}
+                        disabled={isPending || !revenueAmount}
+                        className="flex-1 py-3 min-h-[44px] bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-400 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        {isPending && <Spinner />} Confirm
+                      </button>
+                      <button
+                        onClick={() => { setShowRevenueInput(false); setRevenueAmount(''); }}
+                        className="px-4 py-3 min-h-[44px] border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 text-sm rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowRevenueInput(true)}
+                    disabled={isPending || campaign.is_cancelled}
+                    className="w-full py-3 min-h-[44px] bg-purple-600 hover:bg-purple-700 disabled:bg-zinc-400 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Deposit Revenue
+                  </button>
+                )
+              )}
             </div>
           </div>
         </>
       )}
 
       {isAdmin && !campaign.is_verified && (
-        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="text-lg font-semibold text-blue-600 mb-4">Admin Panel</h3>
+        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
+          <h3 className="text-base font-semibold text-blue-600 mb-4">Admin Panel</h3>
           <button
             onClick={() => handleAction(() => verifyCampaign(campaign.id), 'Campaign verified!')}
             disabled={isPending}
@@ -162,8 +216,8 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
       )}
 
       {isContributor && (
-        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-6">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-1">Your Contribution</h3>
+        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
+          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 mb-1">Your Contribution</h3>
           <p className="text-2xl font-bold text-blue-600 mb-4">{stroopsToXlm(contribution)} XLM</p>
           <div className="flex flex-col gap-3">
             <button
@@ -174,6 +228,15 @@ export default function CampaignActions({ campaign, onActionSuccess }: CampaignA
             >
               {isPending && <Spinner />} Claim Refund
             </button>
+            {campaign.has_revenue_sharing && (
+              <button
+                onClick={() => handleAction(() => claimRevenue(campaign.id, publicKey!), 'Revenue claimed!')}
+                disabled={isPending}
+                className="w-full py-3 min-h-[44px] bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                {isPending && <Spinner />} Claim Revenue
+              </button>
+            )}
           </div>
         </div>
       )}

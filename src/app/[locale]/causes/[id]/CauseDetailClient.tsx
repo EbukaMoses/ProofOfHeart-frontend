@@ -51,44 +51,76 @@ export default function CauseDetailClient({ id }: { id: string }) {
       setUserVote({ causeId: vid, voter: userWalletAddress, voteType, timestamp: new Date(), transactionHash });
       setVoteCounts((prev) => ({ upvotes: voteType === 'upvote' ? prev.upvotes + 1 : prev.upvotes, downvotes: voteType === 'downvote' ? prev.downvotes + 1 : prev.downvotes, totalVotes: prev.totalVotes + 1 }));
       showSuccess('Your vote has been cast successfully.');
+
+      // Trigger immediate refetch after successful transaction
       refetch();
     } catch (error) { showError(parseContractError(error)); }
     finally { setIsVoting(false); }
   };
 
-  if (isLoading) return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="animate-pulse space-y-6">
-          <div className="h-5 bg-zinc-200 dark:bg-zinc-700 rounded w-48" />
-          <div className="bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 space-y-4">
-            <div className="h-8 bg-zinc-200 dark:bg-zinc-700 rounded w-3/4" />
-            <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-full" />
+  // -------------------------------------------------------------------------
+  // Render states
+  // -------------------------------------------------------------------------
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
+        <main className="container mx-auto px-4 py-8 max-w-5xl">
+          <div className="animate-pulse space-y-6">
+            <div className="h-5 bg-zinc-200 dark:bg-zinc-700 rounded w-48" />
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 p-6 space-y-4">
+              <div className="h-8 bg-zinc-200 dark:bg-zinc-700 rounded w-3/4" />
+              <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-full" />
+              <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-5/6" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-zinc-800 rounded-xl p-4 border border-zinc-200 dark:border-zinc-700 h-20" />
+              ))}
+            </div>
           </div>
         </div>
       </main>
     </div>
   );
 
-  if (error) return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
-      <main className="container mx-auto px-4 py-24 text-center">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Failed to load cause</h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mb-8">{error}</p>
-        <Link href="/causes" className="px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors">← Back to Causes</Link>
-      </main>
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
+        <main className="container mx-auto px-4 py-24 text-center">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+            Failed to load cause
+          </h1>
+          <p className="text-zinc-600 dark:text-zinc-400 mb-8">{error}</p>
+          <Link
+            href="/causes"
+            className="px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
+          >
+            ← Back to Causes
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
-  if (!campaign) return (
-    <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
-      <main className="container mx-auto px-4 py-24 text-center">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Cause not found</h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mb-8">This cause does not exist or has been removed.</p>
-        <Link href="/causes" className="px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors">← Back to Causes</Link>
-      </main>
-    </div>
-  );
+  if (!campaign) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
+        <main className="container mx-auto px-4 py-24 text-center">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Cause not found</h1>
+          <p className="text-zinc-600 dark:text-zinc-400 mb-8">
+            This cause does not exist or has been removed.
+          </p>
+          <Link
+            href="/causes"
+            className="px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
+          >
+            ← Back to Causes
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   const raised = stroopsToXlm(campaign.amount_raised);
   const goal = stroopsToXlm(campaign.funding_goal);
@@ -177,7 +209,27 @@ export default function CauseDetailClient({ id }: { id: string }) {
               </button>
             )}
 
-            <CampaignActions campaign={campaign} onActionSuccess={refetch} />
+            {/* Donate button */}
+            {campaign.is_active && !campaign.is_cancelled && (
+              <button
+                onClick={() => {
+                  if (!userWalletAddress) {
+                    showWarning('Please connect your wallet first.');
+                    return;
+                  }
+                  setIsDonationModalOpen(true);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                💜 Fund This Cause
+              </button>
+            )}
+
+            {/* Role-aware actions */}
+            <CampaignActions
+              campaign={campaign}
+              onActionSuccess={refetch}
+            />
 
             <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
               <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-3">Created by</h2>
@@ -209,7 +261,13 @@ export default function CauseDetailClient({ id }: { id: string }) {
         </div>
       </main>
 
-      {isDonationModalOpen && <DonationModal campaign={campaign} onClose={() => setIsDonationModalOpen(false)} onSuccess={refetch} />}
+      {isDonationModalOpen && (
+        <DonationModal
+          campaign={campaign}
+          onClose={() => setIsDonationModalOpen(false)}
+          onSuccess={refetch}
+        />
+      )}
     </div>
   );
 }

@@ -7,9 +7,6 @@ import { Category, CATEGORY_LABELS, stroopsToXlm } from '@/types';
 import CampaignStatusBadge from '@/components/CampaignStatusBadge';
 import FundingProgressBar from '@/components/FundingProgressBar';
 import { CampaignRowSkeleton } from '@/components/Skeleton';
-import CampaignStatusBadge from '../../components/CampaignStatusBadge';
-import FundingProgressBar from '../../components/FundingProgressBar';
-import { CampaignRowSkeleton } from '@/components/Skeleton';
 
 const CATEGORY_ICONS: Record<Category, string> = {
   [Category.Learner]: '🎓',

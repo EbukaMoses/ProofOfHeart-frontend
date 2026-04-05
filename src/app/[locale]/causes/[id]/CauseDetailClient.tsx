@@ -83,6 +83,8 @@ export default function CauseDetailClient({ id }: { id: string }) {
         totalVotes: prev.totalVotes + 1,
       }));
       showSuccess('Your vote has been cast successfully.');
+
+      // Trigger immediate refetch after successful transaction
       refetch();
     } catch (error) {
       showError(parseContractError(error));
@@ -242,6 +244,7 @@ export default function CauseDetailClient({ id }: { id: string }) {
               totalVotes={voteCounts.totalVotes}
             />
 
+            {/* Donate button */}
             {campaign.is_active && !campaign.is_cancelled && (
               <button
                 onClick={() => {
@@ -257,7 +260,11 @@ export default function CauseDetailClient({ id }: { id: string }) {
               </button>
             )}
 
-            <CampaignActions campaign={campaign} onActionSuccess={refetch} />
+            {/* Role-aware actions */}
+            <CampaignActions
+              campaign={campaign}
+              onActionSuccess={refetch}
+            />
 
             <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 p-5">
               <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-3">Created by</h2>

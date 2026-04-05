@@ -79,11 +79,10 @@ export default function CauseDetailClient({ id }: { id: string }) {
               ))}
             </div>
           </div>
-        </div>
-      </main>
-    </div>
-  );
-
+        </main>
+      </div>
+    );
+  }
   if (error) {
     return (
       <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800">
